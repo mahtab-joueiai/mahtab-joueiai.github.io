@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal Activity Tracker PWA">
+    <meta name="theme-color" content="#06b6d4">
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="زندگی مهتاب">
+
+    <title>زندگی مهتاب</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: linear-gradient(145deg, #fef2f2, #fed7d7);
+            margin: 0;
+            padding: 0;
+        }
+
+        .tab-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1em;
+        }
+
+        .tab-buttons {
+            position: sticky;
+            top: 0;
+            background: #06b6d4;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-button {
+            flex: 1 0 auto;
+            padding: 12px 16px;
+            border: none;
+            background: #06b6d4;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-button.active {
+            background: #0891b2;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            margin-top: 1em;
+            background: rgb(140, 215, 228);
+            padding: 1em;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        form input, form select, form button {
+            width: 100%;
+            padding: 0.7em;
+            margin: 0.5em 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button.save-button {
+            background: #dc2626;
+            color: white;
+            font-weight: bold;
+            margin-top: 1em;
+        }
+         button {
+            background: #dc2626;
+            color: white;
+            cursor: pointer;
+        }
+         button:hover { background: #b91c1c; }
+        .form-section {
+            background: linear-gradient(145deg, #fef2f2, #fed7d7);
+            padding: 1.5em;
+            margin: 1em 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid #dc2626;
+        }
+        .timer {
+            font-size: 1.2em;
+            margin: 1em 0;
+            text-align: center;
+            background: linear-gradient(145deg, #fef2f2, #fed7d7);
+            padding: 1em;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid #dc2626;
+        }
+         .timer button {
+            margin: 5px;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        h1, h2 { color: #333; }
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: linear-gradient(145deg, #fef2f2, #fed7d7);
+            margin: 1em 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .activity-table th, .activity-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .activity-table th {
+            background: #0e7490;
+            color: #fef2f2;
+            font-weight: bold;
+        }
+        .hour-cell {
+            background: linear-gradient(145deg, #fcd0d0, #f9aeae);
+            font-weight: bold;
+            width: 80px;
+        }
+        .activity-input {
+            width: 60px;
+            text-align: center;
+            border: none;
+            background: transparent;
+        }
+        .sports-cell {
+            width: 120px;
+        }
+        .sports-dropdown {
+            width: 80px;
+            font-size: 12px;
+            padding: 2px;
+            margin: 2px 0;
+        }
+        .summary-item {
+            margin: 12px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-summary {
+            margin-left: 20px;
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #666;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .breakdown-item {
+            margin-right: 15px;
+            display: inline-block;
+        }
+
+        .total-hours {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #dc2626 !important;
+            font-size: 1.1em;
+            background: linear-gradient(145deg, #fef2f2, #fed7d7);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .metrics-section {
+            margin-top: 25px;
+            padding: 15px;
+            border-top: 2px solid #ddd;
+            background: linear-gradient(145deg, #fef2f2, #fed7d7);
+            border-radius: 8px;
+        }
+
+        .metrics-section > strong {
+            display: block;
+            margin-bottom: 15px;
+            color: #dc2626;
+            font-size: 1.1em;
+        }
+
+        .prayer-completed {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 4px 8px;
+            background: #dcfce7;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .summary-item-excellent {
+            background: linear-gradient(145deg, #d1fae5, #a7f3d0) !important;
+            border-left: 4px solid #10b981;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+
+        .summary-item-good {
+            background: linear-gradient(145deg, #dbeafe, #bfdbfe) !important;
+            border-left: 4px solid #3b82f6;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+
+        .summary-item-warning {
+            background: linear-gradient(145deg, #fef3c7, #fde68a) !important;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+
+        .summary-item-poor {
+            background: linear-gradient(145deg, #fee2e2, #fecaca) !important;
+            border-left: 4px solid #ef4444;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+
+        .summary-item-neutral {
+            background: linear-gradient(145deg, #f3f4f6, #e5e7eb) !important;
+            border-left: 4px solid #9ca3af;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+
+        .goal-info {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .status-excellent {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-good {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .status-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .status-poor {
+            background: #ef4444;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .tab-button {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tab-container">
+        <h1>🏇زندگی مهتاب</h1>
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="showTab('metrics')"> 🤖پودمان</button>
+            <button class="tab-button" onclick="showTab('activities')"> 📅روزانه</button>
+            <button class="tab-button" onclick="showTab('summary')">🏃سرگذشت</button>
+            <button class="tab-button" onclick="showTab('planning')">🕛برنامه</button>
+        </div>
+
+        <!-- Metrics Tab -->
+        <div id="metrics" class="tab-content active">
+            <div class="form-section">
+                <h2>چه روزی؟</h2>
+                <div>
+                    <label for="selected_date">Date:</label>
+                    <input type="date" id="selected_date" onchange="loadDayData()" />
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>روزگذشت</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <label for="mood"><strong>کام 👧:</strong></label>
+                        <select id="mood" style="width: 100%;">
+                            <option value="">گونه</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="calories"><strong>خوراک 🥪:</strong></label>
+                        <input type="number" id="calories" placeholder="e.g. 2000" step="1" min="0" max="10000" style="width: 100%;">
+                    </div>
+
+                    <div>
+                        <label for="water"><strong>آب 💧:</strong></label>
+                        <input type="number" id="water" placeholder="e.g. 8" step="0.5" min="0" max="20" style="width: 100%;">
+                    </div>
+
+                    <div>
+                        <label for="sleep"><strong>خواب 🌛:</strong></label>
+                        <input type="number" id="sleep" placeholder="e.g. 8" step="0.5" min="0" max="20" style="width: 100%;">
+                    </div>
+
+                    <div>
+                        <label for="alcohol"><strong>می 🍺:</strong></label>
+                        <input type="number" id="alcohol" placeholder="e.g. 2" step="0.5" min="0" max="20" style="width: 100%;">
+                    </div>
+
+                    <div>
+                        <label for="weight"><strong>سنگینی ⚖️:</strong></label>
+                        <input type="number" id="weight" placeholder="e.g. 70" step="0.5" min="0" max="300" style="width: 100%;">
+                    </div>
+
+                    <div>
+                        <label for="steps"><strong>گام 🚶:</strong></label>
+                        <input type="number" id="steps" placeholder="e.g. 10000" step="0.5" min="0" max="100000" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <fieldset style="border: none; padding: 0;">
+                    <legend style="font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;">نماژ</legend>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="هاون" value="1">
+                            <span><strong>هاون</strong></span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="رپیتون" value="1">
+                            <span><strong>رپیتون</strong></span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="ازیرن" value="1">
+                            <span><strong>ازیرن</strong></span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="ایوه_سریترم" value="1">
+                            <span><strong>ایوه سریترم</strong></span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="اوشیهن" value="1">
+                            <span><strong>اوشیهن</strong></span>
+                        </label>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="form-section">
+                <h2>⏱ زروان</h2>
+                <div class="timer">
+                    <span id="timer">00:00:00</span><br>
+                    <button type="button" onclick="startTimer()">Start</button>
+                    <button type="button" onclick="stopTimer()">Stop</button>
+                    <button type="button" onclick="resetTimer()">Reset</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button class="save-button" type="button" onclick="saveMetrics()">
+                    💾 اندوز
+                </button>
+            </div>
+        </div>
+
+        <!-- Activities Tab -->
+        <div id="activities" class="tab-content">
+            <h2 id="activities-date"></h2>
+            <div id="activities-table"></div>
+            <button class="save-button" type="button" onclick="saveActivities()">
+                💾 اندوز
+            </button>
+        </div>
+
+        <!-- Summary Tab -->
+        <div id="summary" class="tab-content">
+            <h3 id="summary-date"></h3>
+            <div id="summary-content"></div>
+        </div>
+
+        <!-- Planning Tab -->
+        <div id="planning" class="tab-content">
+            <h2>برنامه ریزی</h2>
+            <div id="planning-form"></div>
+            <button class="save-button" type="button" onclick="savePlanning()">
+                💾 اندوز
+            </button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
+        }
+    </script>
+</body>
+</html>
