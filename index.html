@@ -484,46 +484,46 @@
 
             <div class="form-section">
                 <h3>📤 برون بری (Export)</h3>
-                <p>دانلود تمام داده‌های شما به صورت فایل JSON</p>
+                <p>برداشت همه داده‌های شما </p>
                 <button class="save-button" type="button" onclick="exportData()">
-                    📥 دانلود داده‌ها
+                    📥 برداشت داده‌ها
                 </button>
             </div>
 
             <div class="form-section">
                 <h3>📥 درون بری (Import)</h3>
-                <p>بازیابی داده‌ها از فایل JSON</p>
+                <p>بازیابی داده‌ها از  </p>
                 <input type="file" id="importFile" accept=".json" style="margin: 10px 0;">
                 <button class="save-button" type="button" onclick="importData()">
                     📤 بارگذاری داده‌ها
                 </button>
                 <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                    ⚠️ توجه: این عملیات داده‌های فعلی را جایگزین می‌کند
+                    ⚠️ هشدار: این کار داده‌های اکنون را جایگزین می‌کند
                 </p>
             </div>
 
             <div class="form-section" style="border: 2px solid #f59e0b;">
                 <h3>🗑️ پاک کردن داده‌ها</h3>
-                <p>حذف تمام داده‌های ذخیره شده</p>
+                <p>پاک کردن همه داده‌های اندوخته شده</p>
                 <button type="button" onclick="clearAllData()"
                         style="background: #f59e0b; color: white; font-weight: bold; padding: 10px; border: none; border-radius: 6px; cursor: pointer; width: 100%;">
                     ⚠️ پاک کردن همه داده‌ها
                 </button>
                 <p style="font-size: 0.9em; color: #dc2626; margin-top: 10px;">
-                    ⚠️ هشدار: این عملیات غیرقابل بازگشت است! ابتدا از داده‌های خود نسخه پشتیبان بگیرید.
+                    ⚠️ هشدار: این کار بی بازگشت است! نخست از داده‌های خود پشتیبان بگیرید.
                 </p>
             </div>
 
             <div class="form-section" style="background: linear-gradient(145deg, #e0f2fe, #bae6fd);">
                 <h3>ℹ️ اطلاعات ذخیره‌سازی</h3>
                 <div id="storage-info" style="font-family: monospace; font-size: 0.9em;">
-                    <p><strong>تعداد روزها:</strong> <span id="days-count">-</span></p>
+                    <p><strong> روزها:</strong> <span id="days-count">-</span></p>
                     <p><strong>اندازه داده:</strong> <span id="data-size">-</span> KB</p>
                     <p><strong>داده برنامه‌ریزی:</strong> <span id="planning-status">-</span></p>
                 </div>
                 <button type="button" onclick="updateStorageInfo()"
                         style="background: #06b6d4; color: white; padding: 8px; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px;">
-                    🔄 به‌روزرسانی اطلاعات
+                    🔄 به‌روزرسانی 
                 </button>
             </div>
         </div>
