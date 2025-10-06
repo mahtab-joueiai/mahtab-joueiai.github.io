@@ -83,6 +83,8 @@ function showTab(tabId) {
         renderPlanningForm();
     } else if (tabId === 'activities') {
         renderActivitiesTable();
+    } else if (tabId === 'data') {
+        updateStorageInfo();
     }
 }
 
@@ -588,8 +590,8 @@ function renderPlanningForm() {
     let html = '<div class="form-section"><h3>پیمانه</h3>';
 
     // Mood
-    html += '<div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 10px; align-items: center; margin: 10px 0;">';
-    html += '<label><strong>کام 👧:</strong></label>';
+    html += '<div class="planning-row">';
+    html += '<div class="planning-label">کام 👧:</div>';
     html += '<select id="plan_mood_min" style="width: 100%;"><option value="">از</option>';
     for (let i = 1; i <= 10; i++) {
         const emoji = i <= 3 ? '😢' : i <= 6 ? '😐' : i <= 8 ? '😊' : '😄';
@@ -617,8 +619,8 @@ function renderPlanningForm() {
     ];
 
     metrics.forEach(metric => {
-        html += '<div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 10px; align-items: center; margin: 10px 0;">';
-        html += `<label><strong>${metric.label}:</strong></label>`;
+        html += '<div class="planning-row">';
+        html += `<div class="planning-label">${metric.label}:</div>`;
         html += `<input type="number" id="plan_${metric.key}_min" placeholder="از" value="${planning[metric.key + '_min'] || ''}" style="width: 100%;">`;
         html += `<input type="number" id="plan_${metric.key}_max" placeholder="تا" value="${planning[metric.key + '_max'] || ''}" style="width: 100%;">`;
         html += '<div></div></div>';
@@ -754,4 +756,145 @@ function savePlanning() {
 
     savePlanningData(planning);
     alert('برنامه اندوخته شد! ✅');
+}
+
+// ========== DATA MANAGEMENT FUNCTIONS ==========
+
+// Export all data to JSON file
+function exportData() {
+    const activityData = loadData();
+    const planningData = loadPlanning();
+
+    const exportObj = {
+        version: '1.0.7',
+        exportDate: new Date().toISOString(),
+        activityLog: activityData,
+        planning: planningData
+    };
+
+    const dataStr = JSON.stringify(exportObj, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mahtab-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    alert('داده‌ها برداشت شدند! ✅');
+}
+
+// Import data from JSON file
+function importData() {
+    const fileInput = document.getElementById('importFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('کدام!؟ ⚠️');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+
+            // Validate data structure
+            if (!importedData.activityLog && !importedData.planning) {
+                throw new Error('Invalid data format');
+            }
+
+            // Confirm before overwriting
+            const confirmed = confirm('آیا می‌خواهید داده‌ها را جایگزین کنید؟\n\nبی بازگشت !');
+
+            if (!confirmed) {
+                return;
+            }
+
+            // Create backup of current data before import
+            const currentBackup = {
+                version: '1.0.7',
+                exportDate: new Date().toISOString(),
+                activityLog: loadData(),
+                planning: loadPlanning()
+            };
+            localStorage.setItem('last_backup_before_import', JSON.stringify(currentBackup));
+
+            // Import the data
+            if (importedData.activityLog) {
+                saveData(importedData.activityLog);
+            }
+            if (importedData.planning) {
+                savePlanningData(importedData.planning);
+            }
+
+            alert('داده‌های نو آمدنذ! ✅\n\n(یک برگه پشتیبان از داده‌های پیشین در localStorage اندوخته شد)');
+
+            // Reload the current view
+            loadDayData();
+            updateStorageInfo();
+
+        } catch (error) {
+            alert(' ❌\n\n برگه داده شده خوانا نیست.');
+            console.error('Import error:', error);
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+// Clear all data with confirmation
+function clearAllData() {
+    const confirmed = confirm('⚠️ هشدار! ⚠️\n\nآیا می‌خواهید داده‌ها را پاک کنید؟\n\nاین کار بی بازگشت است!\n\nپیشنهاد: نخست از داده‌های خود پشتیبان بگیرید.');
+
+    if (!confirmed) {
+        return;
+    }
+
+    const doubleConfirm = confirm('برای آخرین بار می‌پرسم!\n\nآیا می‌خواهید همه چیز را پاک کنید؟');
+
+    if (!doubleConfirm) {
+        return;
+    }
+
+    // Create final backup
+    const finalBackup = {
+        version: '1.0.7',
+        exportDate: new Date().toISOString(),
+        activityLog: loadData(),
+        planning: loadPlanning()
+    };
+    localStorage.setItem('last_backup_before_clear', JSON.stringify(finalBackup));
+
+    // Clear all data
+    localStorage.removeItem('activity_log');
+    localStorage.removeItem('planning_data');
+
+    alert('همه داده‌ها پاک شدند! 🗑️\n\n(یک پشتیبان در localStorage اندوخته شد)');
+
+    // Reload the page
+    location.reload();
+}
+
+// Update storage information display
+function updateStorageInfo() {
+    const activityData = loadData();
+    const planningData = loadPlanning();
+
+    // Count days
+    const daysCount = Object.keys(activityData).filter(key => !key.startsWith('_')).length;
+    document.getElementById('days-count').textContent = daysCount;
+
+    // Calculate data size
+    const activitySize = JSON.stringify(activityData).length;
+    const planningSize = JSON.stringify(planningData).length;
+    const totalSize = ((activitySize + planningSize) / 1024).toFixed(2);
+    document.getElementById('data-size').textContent = totalSize;
+
+    // Planning status
+    const hasPlanningData = Object.keys(planningData).length > 0;
+    document.getElementById('planning-status').textContent = hasPlanningData ? '✅ دارد' : '❌ ندارد';
 }
