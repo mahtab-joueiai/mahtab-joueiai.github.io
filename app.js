@@ -632,8 +632,8 @@ function renderPlanningForm() {
     html += '<div class="form-section"><h3>اندازه‌</h3>';
 
     ACTIVITIES.forEach(activity => {
-        html += '<div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 10px; align-items: center; margin: 10px 0;">';
-        html += `<label><strong>${activity}:</strong></label>`;
+        html += '<div class="planning-row">';
+        html += `<div class="planning-label">${activity}:</div>`;
 
         html += `<select id="plan_${activity}_frequency" onchange="updatePlanningPercentages()" style="width: 100%;">`;
         const freqs = ['daily', 'weekly', 'monthly'];
